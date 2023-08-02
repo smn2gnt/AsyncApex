@@ -110,7 +110,7 @@ public without sharing class MyBatchJob implements Async.Batch, Async.Stateful {
 2. Enqueue the Batch job
 
 ```apex
-String jobId = EnqueueJobs.Batch(MyBatchJob);
+String jobId = EnqueueJobs.Batch(new MyBatchJob(), 100);
 ```
 
 
