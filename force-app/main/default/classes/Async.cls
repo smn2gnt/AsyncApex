@@ -1,6 +1,6 @@
 public with sharing class Async {
     public Interface Batch {
-        Iterable<sObject> start();
+        String start(); // MODIFIED: Was Iterable<sObject>
         void execute(List<SObject> scope);
         void finish();
     }

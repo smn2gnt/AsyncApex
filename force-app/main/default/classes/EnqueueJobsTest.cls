@@ -2,57 +2,54 @@
 public class EnqueueJobsTest {
     @TestSetup
     static void setupdata(){
-        insert new Account(Name = 'test001');
-        insert new Account(Name = 'test002');
+        // Ensure some data exists that the query in TestBatch can find
+        List<Account> accs = new List<Account>();
+        for(Integer i=0; i < 5; i++){ // Create a few records
+            accs.add(new Account(Name = 'TestAcc' + i));
+        }
+        insert accs;
     }
+
     @isTest
     static void testEnqueue() {
-        // Create test data for Async.Queue
         Async.Queue testQueue = new TestQueue(); 
-
-        // Enqueue the test queue
         Test.startTest();
         String jobId = EnqueueJobs.Enqueue(testQueue);
         Test.stopTest();
-
-        // Assert that event was published and jobId is not null
         System.assertEquals(true, String.isNotBlank(jobId));
-
     }
 
     @isTest
     static void testBatch() {
-        // Create test data for Async.Batch
         Async.Batch testBatch = new TestBatch(); 
-
-        // Enqueue the test batch
         Test.startTest();
-        String jobId = EnqueueJobs.Batch(testBatch, 1);
+        // Provide a batch size, e.g., 1 or 2, consistent with data
+        String jobId = EnqueueJobs.Batch(testBatch, 2);
         Test.stopTest();
-
-        // Assert that event was published and jobId is not null
         System.assertEquals(true, String.isNotBlank(jobId));
-
     }
 
+    // MODIFIED TestBatch inner class
     public class TestBatch implements Async.Batch, Async.Stateful {
-        public Iterable<sObject> start() {
-            return new IterableSobject('SELECT Id, Name FROM Account');
+        // MODIFIED: start() now returns String (SOQL query)
+        public String start() {
+            return 'SELECT Id, Name FROM Account';
         }
     
         public void execute(List<SObject> scope) {
-            //Implement Execute logic
+            // Test logic can be minimal for EnqueueJobsTest,
+            // as it's not testing the full execution here.
+            System.debug('TestBatch.execute called with scope size: ' + scope.size());
         }
     
         public void finish() {
-            // Implement your test logic here to handle the finish method behavior, if applicable
+            System.debug('TestBatch.finish called.');
         }
     }
     
     public class TestQueue implements Async.Queue {
         public void execute() {
-            //Implement Execute logic
+            System.debug('TestQueue.execute called.');
         }
     }
-    
 }
