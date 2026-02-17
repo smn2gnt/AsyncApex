@@ -1,19 +1,30 @@
+/**
+ * Example Batch job that updates Contact mailing addresses from Account billing addresses
+ * Demonstrates stateful batch processing with record counting
+ */
 public without sharing class UpdateContactsBatch implements Async.Batch, Async.Stateful {
     Integer recordsProcessed = 0;
 
-    public String start() { // MODIFIED: Return type and implementation
+    /**
+     * Start method - returns SOQL query for accounts with contacts
+     * @return SOQL query string
+     */
+    public String start() {
         return 'SELECT ID, BillingStreet, BillingCity, BillingState, ' +
                'BillingPostalCode, BillingCountry, (SELECT ID, MailingStreet, MailingCity, ' +
                'MailingState, MailingPostalCode, MailingCountry FROM Contacts) FROM Account LIMIT 1500';
     }
 
-    public void execute(List<SObject> scope) { // MODIFIED: Parameter type
+    /**
+     * Execute method - updates contact mailing addresses for each batch
+     * @param scope List of Account SObjects with related Contacts
+     */
+    public void execute(List<SObject> scope) {
         List<Contact> contactsToUpdate = new List<Contact>();
 
         for (SObject sObj : scope) {
-            Account account = (Account)sObj; // Cast to Account
+            Account account = (Account)sObj;
 
-            // Sub-queried contacts should be accessible via account.Contacts
             if (account.Contacts != null && !account.Contacts.isEmpty()) {
                 for (Contact contact : account.Contacts) {
                     contact.MailingStreet = account.BillingStreet;
@@ -23,7 +34,7 @@ public without sharing class UpdateContactsBatch implements Async.Batch, Async.S
                     contact.MailingCountry = account.BillingCountry;
 
                     contactsToUpdate.add(contact);
-                    recordsProcessed = recordsProcessed + 1; // Ensure this is incremented appropriately
+                    recordsProcessed++;
                 }
             }
         }
@@ -33,8 +44,10 @@ public without sharing class UpdateContactsBatch implements Async.Batch, Async.S
         }
     }
 
+    /**
+     * Finish method - logs completion message with total records processed
+     */
     public void finish() {
-        System.debug(recordsProcessed + ' records processed. Shazam!');
-        System.debug('Everything finished');
+        System.debug(recordsProcessed + ' records processed. Batch job complete!');
     }
 }

@@ -21,6 +21,7 @@ Welcome to the Custom Async Framework for Salesforce Apex! This project provides
     - [Platform Event Setup](#platform-event-setup)
     - [EnqueueJobs Class](#enqueuejobs-class)
     - [AsyncJobTriggerHandler Class](#asyncjobtriggerhandler-class)
+    - [AsyncJobUtils Class](#asyncjobutils-class)
   - [Limitations](#limitations)
   - [Error Handling](#error-handling)
   - [Monitoring and Troubleshooting](#monitoring-and-troubleshooting)
@@ -171,10 +172,35 @@ The Platform Event setup is essential for handling asynchronous events in the Cu
 
 ### EnqueueJobs Class
 
-The `EnqueueJobs` class is responsible for enqueuing asynchronous jobs, either Queueable or Batch.
-
+The `EnqueueJobs` class is responsible for enqueuing asynchronous jobs, either Queueable or Batch. It provides validation and error handling for all job submissions.
 
 ### AsyncJobTriggerHandler Class
+
+The `AsyncJobTriggerHandler` class is responsible for processing Queue and Batch jobs triggered by Platform Events. It includes comprehensive error handling and automatic cache cleanup.
+
+### AsyncJobUtils Class
+
+The `AsyncJobUtils` class provides utility methods for monitoring and managing async jobs:
+
+```apex
+// Check if a job exists in cache
+Boolean exists = AsyncJobUtils.jobExists(jobId);
+
+// Get detailed information about a job
+Map<String, Object> jobInfo = AsyncJobUtils.getJobInfo(jobId);
+System.debug('Job Type: ' + jobInfo.get('type'));
+System.debug('Records Processed: ' + jobInfo.get('currentPosition'));
+
+// Cancel a pending job (before it's picked up by event handler)
+Boolean cancelled = AsyncJobUtils.cancelJob(jobId);
+
+// Get list of all active jobs
+List<String> activeJobs = AsyncJobUtils.getActiveJobIds();
+System.debug('Active jobs count: ' + activeJobs.size());
+
+// Get count of active jobs
+Integer count = AsyncJobUtils.getActiveJobCount();
+```
 
 The `AsyncJobTriggerHandler` class is responsible for processing Queue and Batch jobs triggered by Platform Events.
 
