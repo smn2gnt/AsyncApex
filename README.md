@@ -202,9 +202,6 @@ System.debug('Active jobs count: ' + activeJobs.size());
 Integer count = AsyncJobUtils.getActiveJobCount();
 ```
 
-The `AsyncJobTriggerHandler` class is responsible for processing Queue and Batch jobs triggered by Platform Events.
-
-
 ## Limitations
 
 While the Custom Async Framework offers an alternative for asynchronous processing in Salesforce Apex, it also has limitations that developers should be aware of:

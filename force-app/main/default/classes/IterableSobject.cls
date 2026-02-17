@@ -38,7 +38,7 @@ public with sharing class IterableSobject implements Iterable<SObject> {
                 this.records = Database.query(query);
                 this.currentIndex = 0;
             } catch (Exception ex) {
-                throw new AsyncException(AsyncException.ErrorType.CURSOR_ERROR, 'Failed to execute query: ' + ex.getMessage());
+                throw new AsyncException(AsyncException.ErrorType.CURSOR_ERROR, 'Failed to execute query for iterator: ' + ex.getMessage());
             }
         }
 

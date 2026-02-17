@@ -42,6 +42,13 @@ public with sharing class UpdateUserRecord implements Async.Queue {
      * @return Generated alias
      */
     private static String generateAlias(Contact contact) {
+        if (String.isBlank(contact.firstName)) {
+            throw new AsyncException(AsyncException.ErrorType.INVALID_CONFIGURATION, 'Contact firstName cannot be blank for alias generation');
+        }
+        if (String.isBlank(contact.lastName)) {
+            throw new AsyncException(AsyncException.ErrorType.INVALID_CONFIGURATION, 'Contact lastName cannot be blank for alias generation');
+        }
+        
         String lastName = contact.lastName.length() > 3
           ? contact.lastName.substring(0, 4)
           : contact.lastName;
