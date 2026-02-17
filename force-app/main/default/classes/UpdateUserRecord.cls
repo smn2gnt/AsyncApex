@@ -49,7 +49,7 @@ public with sharing class UpdateUserRecord implements Async.Queue {
             throw new AsyncException(AsyncException.ErrorType.INVALID_CONFIGURATION, 'Contact lastName must have at least one character for alias generation');
         }
         
-        // Use first 4 characters of lastName if available, otherwise use full lastName
+        // Use first 4 characters of lastName if length is 4 or more, otherwise use full lastName
         String lastName = contact.lastName.length() >= 4
           ? contact.lastName.substring(0, 4)
           : contact.lastName;
