@@ -46,6 +46,8 @@ public class AsyncLogger {
     }
     
     private static String buildLogMessage(LogLevel level, String jobId, String context, String message) {
-        return '[AsyncFramework] [' + level.name() + '] [JobId: ' + jobId + '] [Context: ' + context + '] ' + message;
+        String safeJobId = String.isBlank(jobId) ? 'N/A' : jobId;
+        String safeContext = String.isBlank(context) ? 'N/A' : context;
+        return '[AsyncFramework] [' + level.name() + '] [JobId: ' + safeJobId + '] [Context: ' + safeContext + '] ' + message;
     }
 }

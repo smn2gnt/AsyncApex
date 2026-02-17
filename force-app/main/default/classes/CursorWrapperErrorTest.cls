@@ -1,15 +1,14 @@
 @isTest
 private class CursorWrapperErrorTest {
     /**
-     * Test invalid chunk size throws exception
+     * Test invalid chunk size - zero
      */
     @isTest
-    static void testInvalidChunkSize() {
+    static void testInvalidChunkSizeZero() {
         String query = 'SELECT Id FROM Account LIMIT 1';
         CursorWrapper wrapper = new CursorWrapper(query);
-        
-        // Test zero chunk size
         Boolean exceptionThrown = false;
+        
         Test.startTest();
         try {
             wrapper.fetchNextChunk(0);
@@ -19,10 +18,19 @@ private class CursorWrapperErrorTest {
             System.assert(ex.getMessage().contains('greater than 0'), 'Should mention chunk size requirement');
         }
         Test.stopTest();
-        System.assert(exceptionThrown, 'Should throw exception for zero chunk size');
         
-        // Test negative chunk size
-        exceptionThrown = false;
+        System.assert(exceptionThrown, 'Should throw exception for zero chunk size');
+    }
+    
+    /**
+     * Test invalid chunk size - negative
+     */
+    @isTest
+    static void testInvalidChunkSizeNegative() {
+        String query = 'SELECT Id FROM Account LIMIT 1';
+        CursorWrapper wrapper = new CursorWrapper(query);
+        Boolean exceptionThrown = false;
+        
         Test.startTest();
         try {
             wrapper.fetchNextChunk(-5);
@@ -31,6 +39,7 @@ private class CursorWrapperErrorTest {
             System.assertEquals(AsyncException.ErrorType.INVALID_CONFIGURATION, ex.getErrorType());
         }
         Test.stopTest();
+        
         System.assert(exceptionThrown, 'Should throw exception for negative chunk size');
     }
     

@@ -59,14 +59,13 @@ private class EnqueueJobsErrorTest {
     }
     
     /**
-     * Test that invalid batch size throws exception
+     * Test that invalid batch size throws exception - zero
      */
     @isTest
-    static void testBatchInvalidSize() {
+    static void testBatchInvalidSizeZero() {
         Async.Batch testBatch = new TestBatch();
-        
-        // Test zero batch size
         Boolean exceptionThrown = false;
+        
         Test.startTest();
         try {
             EnqueueJobs.Batch(testBatch, 0);
@@ -76,10 +75,18 @@ private class EnqueueJobsErrorTest {
             System.assert(ex.getMessage().contains('Batch size'), 'Should mention batch size in message');
         }
         Test.stopTest();
-        System.assert(exceptionThrown, 'Should throw AsyncException for zero batch size');
         
-        // Test negative batch size
-        exceptionThrown = false;
+        System.assert(exceptionThrown, 'Should throw AsyncException for zero batch size');
+    }
+    
+    /**
+     * Test that invalid batch size throws exception - negative
+     */
+    @isTest
+    static void testBatchInvalidSizeNegative() {
+        Async.Batch testBatch = new TestBatch();
+        Boolean exceptionThrown = false;
+        
         Test.startTest();
         try {
             EnqueueJobs.Batch(testBatch, -10);
@@ -88,10 +95,18 @@ private class EnqueueJobsErrorTest {
             System.assertEquals(AsyncException.ErrorType.INVALID_CONFIGURATION, ex.getErrorType());
         }
         Test.stopTest();
-        System.assert(exceptionThrown, 'Should throw AsyncException for negative batch size');
         
-        // Test batch size too large
-        exceptionThrown = false;
+        System.assert(exceptionThrown, 'Should throw AsyncException for negative batch size');
+    }
+    
+    /**
+     * Test that invalid batch size throws exception - too large
+     */
+    @isTest
+    static void testBatchInvalidSizeTooLarge() {
+        Async.Batch testBatch = new TestBatch();
+        Boolean exceptionThrown = false;
+        
         Test.startTest();
         try {
             EnqueueJobs.Batch(testBatch, 2001);
@@ -100,6 +115,7 @@ private class EnqueueJobsErrorTest {
             System.assertEquals(AsyncException.ErrorType.INVALID_CONFIGURATION, ex.getErrorType());
         }
         Test.stopTest();
+        
         System.assert(exceptionThrown, 'Should throw AsyncException for batch size over 2000');
     }
     

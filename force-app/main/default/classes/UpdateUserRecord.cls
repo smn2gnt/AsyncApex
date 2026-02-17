@@ -49,7 +49,7 @@ public with sharing class UpdateUserRecord implements Async.Queue {
             throw new AsyncException(AsyncException.ErrorType.INVALID_CONFIGURATION, 'Contact lastName cannot be blank for alias generation');
         }
         
-        String lastName = contact.lastName.length() > 3
+        String lastName = contact.lastName.length() > 4
           ? contact.lastName.substring(0, 4)
           : contact.lastName;
     
