@@ -22,6 +22,9 @@ Welcome to the Custom Async Framework for Salesforce Apex! This project provides
     - [EnqueueJobs Class](#enqueuejobs-class)
     - [AsyncJobTriggerHandler Class](#asyncjobtriggerhandler-class)
   - [Limitations](#limitations)
+  - [Error Handling](#error-handling)
+  - [Monitoring and Troubleshooting](#monitoring-and-troubleshooting)
+  - [Performance Best Practices](#performance-best-practices)
   - [Contributing](#contributing)
   - [License](#license)
 
@@ -31,10 +34,14 @@ Salesforce provides powerful tools for asynchronous processing like Queueable an
 
 ## Features
 
-- Alternative to Queueable and Batch Apex.
-- Utilizes Salesforce Platform Cache for storing class instances, reducing the overhead of object initialization.
-- Leverages Platform Events as an event bus for executing actions in a sequence.
-- Easy-to-use and intuitive API for developers.
+- **Alternative to Queueable and Batch Apex** - Provides custom async processing when standard solutions don't fit.
+- **Platform Cache Integration** - Stores class instances in cache, reducing overhead of object initialization.
+- **Platform Events Bus** - Leverages events for executing actions in sequence with automatic chaining.
+- **Cursor-Based Processing** - Uses Database.Cursor for efficient memory usage with large datasets.
+- **Comprehensive Error Handling** - Built-in exception handling, logging, and error recovery.
+- **Input Validation** - Validates parameters to prevent common configuration errors.
+- **Stateful & Stateless Modes** - Support for both stateful and stateless batch processing.
+- **Developer-Friendly API** - Easy-to-use and intuitive interface for developers.
 
 ## Installation
 
@@ -174,18 +181,79 @@ The `AsyncJobTriggerHandler` class is responsible for processing Queue and Batch
 
 ## Limitations
 
-While the Custom Async Framework offers an alternative for asynchronous processing in Salesforce Apex, it also has many limitations that developers should be aware of:
+While the Custom Async Framework offers an alternative for asynchronous processing in Salesforce Apex, it also has limitations that developers should be aware of:
 
 1. **No Direct Callouts**: Framework does not support making callouts for obvious reasons.
    
-2. **No Querylocator**: Framework does not support using the `Database.getQueryLocator()` method within Batch type jobs. If your use case requires this feature, please be aware that it is not compatible with the framework's current implementation.
+2. **No Querylocator**: Framework does not support using the `Database.getQueryLocator()` method within Batch type jobs. Instead, it uses `Database.getCursor()` for efficient record processing.
 
-3. **Limited Number of Records**: In Batch jobs, the number of records returned by the `start` method should not exceed 100 KB. 
+3. **Limited Number of Records**: In Batch jobs, the number of records returned by the `start` method should not exceed 100 KB per cursor operation.
    
 4. **Platform Cache Limits**: The usage of Platform Cache is subject to its own limits and allocations in your Salesforce org. Ensure that you monitor the cache usage to avoid reaching the limits.
 
+5. **Governor Limits**: As with any Salesforce Apex code, the Custom Async Framework is subject to governor limits. Ensure that your asynchronous jobs are designed to comply with these limits.
 
-4. **Governor Limits**: As with any Salesforce Apex code, the Custom Async Framework is subject to governor limits. Ensure that your asynchronous jobs are designed to comply with these limits.
+## Error Handling
+
+The framework includes comprehensive error handling:
+
+- **AsyncException**: Custom exception class with error type categorization (CACHE_ERROR, BATCH_EXECUTION_ERROR, QUEUE_EXECUTION_ERROR, INVALID_CONFIGURATION, CURSOR_ERROR)
+- **AsyncLogger**: Structured logging for monitoring and troubleshooting with different log levels (ERROR, WARNING, INFO, DEBUG)
+- **Input Validation**: All public methods validate inputs and throw descriptive exceptions for invalid parameters
+- **Automatic Cleanup**: Cache entries are automatically cleaned up on errors to prevent orphaned data
+
+### Best Practices for Error Handling
+
+```apex
+// Wrap your batch/queue execute logic in try-catch for custom error handling
+public class MyRobustBatch implements Async.Batch {
+    public String start() {
+        return 'SELECT Id, Name FROM Account WHERE Status__c = \'Active\'';
+    }
+    
+    public void execute(List<SObject> scope) {
+        try {
+            // Your processing logic
+            List<Account> accounts = (List<Account>)scope;
+            for (Account acc : accounts) {
+                // Process account
+            }
+            update scope;
+        } catch (DmlException ex) {
+            // Handle DML errors gracefully
+            System.debug(LoggingLevel.ERROR, 'DML Error: ' + ex.getMessage());
+            // Optionally log to custom object or send notification
+        }
+    }
+    
+    public void finish() {
+        // Send completion notification or cleanup
+    }
+}
+```
+
+## Monitoring and Troubleshooting
+
+The framework provides detailed logging for all operations:
+
+- Job enqueue operations are logged with job IDs
+- Batch chunk processing logs the number of records processed
+- Errors are logged with full stack traces and context
+- Cache operations are logged for debugging
+
+To monitor your async jobs, check the debug logs filtered by 'AsyncFramework' prefix.
+
+## Performance Best Practices
+
+1. **Batch Size Selection**: Choose appropriate batch sizes (50-200) based on your processing complexity. Smaller batches for complex operations, larger for simple updates.
+
+2. **Query Optimization**: Ensure your SOQL queries use indexes and are optimized. The `start()` method should return efficient queries.
+
+3. **Stateful vs Stateless**: Use stateful batches (`implements Async.Stateful`) only when you need to maintain state across chunks. Stateless batches use less memory.
+
+4. **Cache Monitoring**: Monitor your Platform Cache usage to ensure you don't exceed org limits.
+
+5. **Governor Limit Awareness**: Each batch chunk operates within governor limits. Design your execute() logic accordingly.
 
 ## Contributing
 
