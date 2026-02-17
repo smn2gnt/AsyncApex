@@ -39,7 +39,7 @@ public with sharing class UpdateUserRecord implements Async.Queue {
     /**
      * Generate a user alias from the contact name
      * @param contact The contact to generate alias for
-     * @return Generated alias (max 8 characters: 1 from first name + up to 4 from last name)
+     * @return Generated alias (max 5 characters: 1 from first name + up to 4 from last name)
      */
     private static String generateAlias(Contact contact) {
         if (String.isBlank(contact.firstName) || contact.firstName.length() < 1) {
